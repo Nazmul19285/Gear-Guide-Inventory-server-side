@@ -75,6 +75,42 @@ async function run() {
 }
 run().catch(console.dir);
 
+async function runAccount() {
+  try{
+    await client.connect();
+    const accountCollection = client.db('gearGuideInventory').collection('account');
+
+    // get account
+    app.get('/account', async(req, res) => {
+      const query = {};
+      const cursor = accountCollection.find(query);
+      const account = await cursor.toArray();
+      res.send(account);
+    });
+
+    // Update account
+    app.put('/account/:id', async(req, res) => {
+      const id = req.params.id;
+      const updatedItem = req.body;
+      const filter = {_id: ObjectId(id)};
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          sell: updatedItem.sell,
+          product: updatedItem.product
+        }
+      };
+      const result = await accountCollection.updateOne(filter, updatedDoc, options);
+      res.send(result);
+    })
+
+  }
+  finally{
+
+  }
+}
+runAccount().catch(console.dir);
+
 
 app.get('/', (req, res) => {
     res.send("Running gear-guide server");
